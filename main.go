@@ -27,7 +27,6 @@ import (
 
 func init() {
 	beegae.Router("/todos", &controllers.MainController{})
-	beegae.Router("/upload", &controllers.UploadController{})
 	beegae.DirectoryIndex = true
 
 	// Swagger doesn't appear to work
@@ -41,6 +40,6 @@ func init() {
 		),
 	)
 	beegae.AddNamespace(ns)*/
-	beegae.Run()
+	//beegae.Run()
 
 }
