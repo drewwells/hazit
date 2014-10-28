@@ -16,6 +16,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
+	"log"
 	"math/big"
 	"net/http"
 	"unicode"
@@ -26,8 +27,6 @@ import (
 	"google.golang.org/cloud/storage"
 
 	"appengine"
-
-	"appengine/file"
 
 	//"appengine/file"
 )
@@ -69,11 +68,9 @@ func (this *UploadController) Post() {
 		c.Errorf("File error: %s", err)
 	}
 
-	bucketName, err := file.DefaultBucketName(c)
-	bucketName = "hazzzit.appspot.com"
-	if err != nil {
-		c.Errorf("failed to get default GCS bucket name: %v", err)
-		return
+	bucketName := beegae.AppConfig.String("bucket")
+	if bucketName == "" {
+		log.Fatal("Set the bucket name in conf/app.conf")
 	}
 
 	conf := google.NewAppEngineConfig(
@@ -95,6 +92,10 @@ func (this *UploadController) Post() {
 
 	if err := wc.Close(); err != nil {
 		c.Errorf("Write Error: %s", err)
+	}
+	_, err = wc.Object()
+	if err != nil {
+		c.Errorf("Object Creation %s", err)
 	}
 
 	this.Data["Name"] = name

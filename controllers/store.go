@@ -24,7 +24,10 @@ func (this StoreController) Get() {
 
 	c := this.AppEngineCtx
 
-	bucketName := "hazzzit.appspot.com"
+	bucketName := beegae.AppConfig.String("bucket")
+	if bucketName == "" {
+		log.Fatal("Set the bucket name in conf/app.conf")
+	}
 
 	conf := google.NewAppEngineConfig(
 		c, storage.ScopeFullControl)
