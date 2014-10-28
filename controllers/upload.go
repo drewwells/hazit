@@ -52,10 +52,13 @@ func fileName() string {
 	return string(bs)
 }
 
+// Render a form for submitting file data
 func (this *UploadController) Get() {
 	this.TplNames = "form.tpl"
 }
 
+// Post takes as input a form with file data.  This is stored
+// in the configured GCS bucket.
 func (this *UploadController) Post() {
 	var bs bytes.Buffer
 	upload, header, err := this.GetFile("file")
@@ -73,6 +76,11 @@ func (this *UploadController) Post() {
 	ctx := cloud.NewContext(appengine.AppID(c),
 		&http.Client{Transport: conf.NewTransport()})
 	name := fileName()
+
+	err = storage.PutDefaultACLRule(ctx, BucketName, "allUsers", storage.RoleReader)
+	if err != nil {
+		c.Errorf("%s", err)
+	}
 	wc := storage.NewWriter(ctx,
 		BucketName,
 		name,

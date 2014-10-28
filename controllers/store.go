@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	context "code.google.com/p/go.net/context"
 	"github.com/astaxie/beegae"
 	"github.com/golang/oauth2/google"
 	"google.golang.org/cloud"
@@ -18,20 +19,24 @@ type StoreController struct {
 	beegae.Controller
 }
 
-func (this StoreController) Get() {
+// Get if passed a name looks for that image and shows it
+// Otherwise, all images in GCS are rendered on the page.
+func (this *StoreController) Get() {
 
-	name := this.GetString("name")
-	if name == "" {
-		this.List()
-		return
-	}
 	c := this.AppEngineCtx
-
+	// This should be global in the Controller
 	conf := google.NewAppEngineConfig(
 		c, storage.ScopeFullControl)
 
 	ctx := cloud.NewContext(appengine.AppID(c),
 		&http.Client{Transport: conf.NewTransport()})
+
+	name := this.GetString("name")
+	this.Data["name"] = "boom"
+	if name == "" {
+		this.List(ctx)
+		return
+	}
 
 	rc, err := storage.NewReader(
 		ctx,
@@ -50,20 +55,21 @@ func (this StoreController) Get() {
 
 }
 
-func (this StoreController) List() {
-	ctx := cloud.NewContext("project-id", &http.Client{Transport: nil})
+func (this *StoreController) List(ctx context.Context) {
 
 	var query *storage.Query
+	var names []string
 	for {
 		// If you are using this package on App Engine Managed VMs runtime,
 		// you can init a bucket client with your app's default bucket name.
 		// See http://godoc.org/google.golang.org/appengine/file#DefaultBucketName.
-		objects, err := storage.ListObjects(ctx, "bucketname", query)
+		objects, err := storage.ListObjects(ctx, BucketName, query)
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, obj := range objects.Results {
 			log.Printf("object name: %s, size: %v", obj.Name, obj.Size)
+			names = append(names, obj.Name)
 		}
 		// if there are more results, objects.Next
 		// will be non-nil.
@@ -72,5 +78,8 @@ func (this StoreController) List() {
 			break
 		}
 	}
+
+	this.Data["Names"] = &names
+	this.TplNames = "storecontroller/list.tpl"
 
 }
