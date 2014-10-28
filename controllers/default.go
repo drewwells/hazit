@@ -48,9 +48,6 @@ import (
 
 	"models"
 
-	"appengine"
-	"appengine/datastore"
-
 	"github.com/astaxie/beegae"
 )
 
@@ -59,47 +56,39 @@ type MainController struct {
 }
 
 func (this *MainController) Get() {
-	todos := []models.Todo{}
-	ks, err := datastore.NewQuery("Todo").Ancestor(models.DefaultTodoList(this.AppEngineCtx)).Order("Created").GetAll(this.AppEngineCtx, &todos)
-	if err != nil {
-		this.Data["json"] = err
-		return
-	}
-	for i := 0; i < len(todos); i++ {
-		todos[i].Id = ks[i].IntID()
-	}
-	this.Data["json"] = todos
+	//this.TplNames = "views/form.tpl"
+
 }
 
-func (this *MainController) Post() {
-	todo, err := decodeTodo(this.Ctx.Input.Request.Body)
-	if err != nil {
-		this.Data["json"] = err
-		return
-	}
-	t, err := todo.Save(this.AppEngineCtx)
-	if err != nil {
-		this.Data["json"] = err
-	} else {
-		this.Data["json"] = &t
-	}
-}
+// func (this *MainController) Post() {
+// 	todo, err := decodeTodo(this.Ctx.Input.Request.Body)
+// 	if err != nil {
+// 		this.Data["json"] = err
+// 		return
+// 	}
+// 	t, err := todo.Save(this.AppEngineCtx)
+// 	if err != nil {
+// 		this.Data["json"] = err
+// 	} else {
+// 		this.Data["json"] = &t
+// 	}
+// }
 
-func (this *MainController) Delete() {
-	err := datastore.RunInTransaction(this.AppEngineCtx, func(c appengine.Context) error {
-		ks, err := datastore.NewQuery("Todo").KeysOnly().Ancestor(models.DefaultTodoList(c)).Filter("Done=", true).GetAll(c, nil)
-		if err != nil {
-			return err
-		}
-		return datastore.DeleteMulti(c, ks)
-	}, nil)
+// func (this *MainController) Delete() {
+// 	err := datastore.RunInTransaction(this.AppEngineCtx, func(c appengine.Context) error {
+// 		ks, err := datastore.NewQuery("Todo").KeysOnly().Ancestor(models.DefaultTodoList(c)).Filter("Done=", true).GetAll(c, nil)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		return datastore.DeleteMulti(c, ks)
+// 	}, nil)
 
-	if err == nil {
-		this.Data["json"] = nil
-	} else {
-		this.Data["json"] = err
-	}
-}
+// 	if err == nil {
+// 		this.Data["json"] = nil
+// 	} else {
+// 		this.Data["json"] = err
+// 	}
+// }
 
 func (this *MainController) Render() error {
 	if _, ok := this.Data["json"].(error); ok {
