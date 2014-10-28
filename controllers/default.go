@@ -3,11 +3,7 @@
 package controllers
 
 import (
-	"encoding/json"
-	"io"
 	"log"
-
-	"models"
 
 	"github.com/astaxie/beegae"
 )
@@ -26,21 +22,5 @@ type MainController struct {
 }
 
 func (this *MainController) Get() {
-	//this.TplNames = "views/form.tpl"
-
-}
-
-func (this *MainController) Render() error {
-	if _, ok := this.Data["json"].(error); ok {
-		this.AppEngineCtx.Errorf("todo error: %v", this.Data["json"])
-	}
-	this.ServeJson()
-	return nil
-}
-
-func decodeTodo(r io.ReadCloser) (*models.Todo, error) {
-	defer r.Close()
-	var todo models.Todo
-	err := json.NewDecoder(r).Decode(&todo)
-	return &todo, err
+	this.TplNames = "form.tpl"
 }
