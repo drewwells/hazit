@@ -45,6 +45,7 @@ package controllers
 import (
 	"encoding/json"
 	"io"
+	"log"
 
 	"models"
 
@@ -89,6 +90,14 @@ func (this *MainController) Get() {
 // 		this.Data["json"] = err
 // 	}
 // }
+var BucketName string
+
+func init() {
+	BucketName = beegae.AppConfig.String("bucket")
+	if BucketName == "" {
+		log.Fatal("Set the bucket name in conf/app.conf")
+	}
+}
 
 func (this *MainController) Render() error {
 	if _, ok := this.Data["json"].(error); ok {

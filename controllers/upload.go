@@ -16,7 +16,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"log"
 	"math/big"
 	"net/http"
 	"unicode"
@@ -68,11 +67,6 @@ func (this *UploadController) Post() {
 		c.Errorf("File error: %s", err)
 	}
 
-	bucketName := beegae.AppConfig.String("bucket")
-	if bucketName == "" {
-		log.Fatal("Set the bucket name in conf/app.conf")
-	}
-
 	conf := google.NewAppEngineConfig(
 		c, storage.ScopeFullControl)
 
@@ -80,7 +74,7 @@ func (this *UploadController) Post() {
 		&http.Client{Transport: conf.NewTransport()})
 	name := fileName()
 	wc := storage.NewWriter(ctx,
-		bucketName,
+		BucketName,
 		name,
 		&storage.Object{
 			ContentType: "text/plain",

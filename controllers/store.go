@@ -21,13 +21,11 @@ type StoreController struct {
 func (this StoreController) Get() {
 
 	name := this.GetString("name")
-
-	c := this.AppEngineCtx
-
-	bucketName := beegae.AppConfig.String("bucket")
-	if bucketName == "" {
-		log.Fatal("Set the bucket name in conf/app.conf")
+	if name == "" {
+		this.List()
+		return
 	}
+	c := this.AppEngineCtx
 
 	conf := google.NewAppEngineConfig(
 		c, storage.ScopeFullControl)
@@ -37,7 +35,7 @@ func (this StoreController) Get() {
 
 	rc, err := storage.NewReader(
 		ctx,
-		bucketName,
+		BucketName,
 		name)
 	if err != nil {
 		log.Fatal(err)
@@ -49,5 +47,30 @@ func (this StoreController) Get() {
 	rc.Close()
 
 	fmt.Fprintf(this.Ctx.ResponseWriter, "%s", slurp)
+
+}
+
+func (this StoreController) List() {
+	ctx := cloud.NewContext("project-id", &http.Client{Transport: nil})
+
+	var query *storage.Query
+	for {
+		// If you are using this package on App Engine Managed VMs runtime,
+		// you can init a bucket client with your app's default bucket name.
+		// See http://godoc.org/google.golang.org/appengine/file#DefaultBucketName.
+		objects, err := storage.ListObjects(ctx, "bucketname", query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, obj := range objects.Results {
+			log.Printf("object name: %s, size: %v", obj.Name, obj.Size)
+		}
+		// if there are more results, objects.Next
+		// will be non-nil.
+		query = objects.Next
+		if query == nil {
+			break
+		}
+	}
 
 }
