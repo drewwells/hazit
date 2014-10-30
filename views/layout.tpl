@@ -1,0 +1,2 @@
+{{template "form.tpl"}}
+{{.LayoutContent}}

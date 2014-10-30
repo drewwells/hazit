@@ -80,6 +80,7 @@ func (this *StoreController) List(ctx context.Context) {
 	}
 
 	this.Data["Names"] = &names
+	this.Layout = "layout.tpl"
 	this.TplNames = "storecontroller/list.tpl"
 
 }

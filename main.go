@@ -26,7 +26,7 @@ import (
 )
 
 func init() {
-	beegae.Router("/", &controllers.MainController{})
+	beegae.Router("/", &controllers.StoreController{})
 	beegae.Router("/upload", &controllers.UploadController{})
 	beegae.Router("/store", &controllers.StoreController{})
 	beegae.DirectoryIndex = true
